@@ -21,7 +21,7 @@ Fiona
 Flask
 Flask-Mail
 Flask-RESTful
-GDAL
+
 geopandas 
 gunicorn==20.1.0
 importlib-metadata 
