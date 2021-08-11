@@ -281,7 +281,7 @@ def contact_form():
         msg = Message('aoi', sender='peter@mailtrap.io', recipients=['510aebd243-c27f85@inbox.mailtrap.io'])
         msg.body = "Hey Paul, sending you this email from my Flask app, lmk " \
                    "if it works {}, {}, {}".format(missing_aoi_form['full_name'], missing_aoi_form['email'], missing_aoi_form['phone'] )
-        #mail.send(msg)
+        mail.send(msg)
 
         insertMissingAoiForm(missing_aoi_form)
         return {"message": 'context'}
