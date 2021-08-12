@@ -29,7 +29,7 @@ CREATE TABLE missing_aoi (
 
 CREATE TABLE missing_aoi_form (
     form_id SERIAL PRIMARY KEY NOT NULL,
-    a oi_id INTEGER REFERENCES missing_aoi (aoi_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    aoi_id INTEGER REFERENCES missing_aoi (aoi_id) ON UPDATE CASCADE ON DELETE CASCADE,
     full_name VARCHAR NOT NULL,
     email VARCHAR NOT NULL,
     phone VARCHAR NOT NULL
