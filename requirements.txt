@@ -50,14 +50,11 @@ pyproj
 pyrsistent 
 python-dateutil 
 pytz 
-pywin32
-pywinpty
-pyzmq
+
 rasterio
  
 Shapely
 
-webencodings
 Werkzeug
 
 zipp 
