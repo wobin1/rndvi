@@ -123,6 +123,8 @@ def indexS2Imagery(img_data={}, config_data={}):
         raise Exception('Invalid values supplied')
 
 
+
+
 def performSearch(aoi, db_config={}):
     conn = getConnection()
     query = "SELECT a.imagery_id, a.imagery_path, b.server_path FROM imagery_extents a INNER JOIN file_servers b ON a.imagery_server = b.server_id "
@@ -183,6 +185,20 @@ def insertMissingAoiForm(missing_aoi_form={}, db_config={}):
     conn.commit()
     cur.close()
 
+@app.route('/imagery')
+def indexImagery():
+    img_data = {
+    'img_path': 'S2A_MSIL1C_20210812T013721_N0301_R031_T52KED_20210812T030839.SAFE\GRANULE\L1C_T52KED_A032060_20210812T014008\IMG_DATA',
+    'img_server':1,
+    'img_date':'2021-08-12 12:18:00'
+}
+
+    config_data = {
+        'base_path': 'C:/dev/RFH/NDVI/s2'
+    }
+    indexS2Imagery(img_data, config_data)
+    return "done"
+
 class CalculateNdvi(Resource):
     def post(self):
         if request.method == "POST":
@@ -204,6 +220,53 @@ class CalculateNdvi(Resource):
                 geom = geom.set_crs('epsg:4326')
                 b04_filename = os.path.splitext(b04)[0]
                 b08_filename = os.path.splitext(b08)[0]
+
+                #transform imagery
+                # dst_crs = 'EPSG:4326'
+
+                # with rasterio.open(b04) as src:
+                #     transform, width, height = calculate_default_transform(
+                #         src.crs, dst_crs, src.width, src.height, *src.bounds)
+                #     kwargs = src.meta.copy()
+                #     kwargs.update({
+                #         'crs': dst_crs,
+                #         'transform': transform,
+                #         'width': width,
+                #         'height': height
+                #     })
+
+                #     with rasterio.open(b04_filename + '.tif', 'w', **kwargs) as dst:
+                #         for i in range(1, src.count + 1):
+                #             reproject(
+                #                 source=rasterio.band(src, i),
+                #                 destination=rasterio.band(dst, i),
+                #                 src_transform=src.transform,
+                #                 src_crs=src.crs,
+                #                 dst_transform=transform,
+                #                 dst_crs=dst_crs,
+                #                 resampling=Resampling.nearest)
+
+                # with rasterio.open(b08) as src:
+                #     transform, width, height = calculate_default_transform(
+                #         src.crs, dst_crs, src.width, src.height, *src.bounds)
+                #     kwargs = src.meta.copy()
+                #     kwargs.update({
+                #         'crs': dst_crs,
+                #         'transform': transform,
+                #         'width': width,
+                #         'height': height
+                #     })
+
+                # with rasterio.open(b08_filename + '.tif', 'w', **kwargs) as dst:
+                #     for i in range(1, src.count + 1):
+                #         reproject(
+                #             source=rasterio.band(src, i),
+                #             destination=rasterio.band(dst, i),
+                #             src_transform=src.transform,
+                #             src_crs=src.crs,
+                #             dst_transform=transform,
+                #             dst_crs=dst_crs,
+                #             resampling=Resampling.nearest)
 
                 def clipBand4(band4_path):
                     with rasterio.open(band4_path, 'r') as src:
@@ -247,12 +310,12 @@ class CalculateNdvi(Resource):
                                       )
                 image.write(ndvi, 1)
                 image.close()
-                return {"Download NDVI": 'http://127.0.0.1:5000/download_ndvi'}
+                return {"Download NDVI": 'http://3.8.127.168/download_ndvi'}
             else:
                 missing_aoi = geojson
                 missing_id = insertMissingAoi(missing_aoi)
                 missing_id = missing_id[0]
-                aoi_form = 'http://127.0.0.1:5000/contact_form/' + str(missing_id)
+                aoi_form = 'http://3.8.127.168/contact_form/' + str(missing_id)
                 return {"Your aoi is currently not available, "
                         "use the link below to fill our form so that we can contact": aoi_form}
 
@@ -260,7 +323,7 @@ class CalculateNdvi(Resource):
 @app.route('/download_ndvi', methods=['get'])
 def download_ndvi():
 
-    response = send_file(r'C:\dev\RFH\NDVI\s2\S2B_MSIL1C_20200328T095029_N0209_R079_T32PKT_20200328T115916.SAFE\GRANULE\L1C_T32PKT_A015978_20200328T100330\IMG_DATA/ndvi.tiff' , mimetype='image/jpeg',
+    response = send_file(r'C:\dev\RFH\NDVI\s2\S2A_MSIL1C_20210812T013721_N0301_R031_T52KED_20210812T030839.SAFE\GRANULE\L1C_T52KED_A032060_20210812T014008\IMG_DATA\ndvi.tiff' , mimetype='image/jpeg',
                          attachment_filename='ndvi.tiff',
                          as_attachment=True)
     response.headers["x-filename"] = 'ndvi.tiff'
@@ -290,4 +353,4 @@ def contact_form():
 
 api.add_resource(CalculateNdvi, "/")
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port="5000", debug=True)
+    app.run(host="0.0.0.0", port="80", debug=True)
